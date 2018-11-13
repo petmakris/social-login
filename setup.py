@@ -6,13 +6,15 @@ setup(
     packages = find_packages(),
     author = "Petros Makris",
     install_requires = [
-        'cherrypy==18.0.1'
-        ],
+        'cherrypy==18.0.1',
+        'jinja2==2.10',
+        'pickledb==0.8.1'
+    ],
 
     entry_points = {
         'console_scripts': [
             'serve = social.app:app',
         ]
-    }    
+    }
 )
 

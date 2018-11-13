@@ -4,22 +4,38 @@ import cherrypy
 from os.path import join, abspath, dirname
 from social.conf import cherry_conf
 
-root = abspath(join(dirname(__file__), '..'))
+import pickledb 
+
+from jinja2 import Template, Environment, FileSystemLoader
+
+ROOT          = abspath(join(dirname(__file__), '..'))
+TEMPLATE_ROOT = join(ROOT, 'templates')
+JINJA_LOADER  = FileSystemLoader(TEMPLATE_ROOT)
+JINJA_ENV     = Environment(loader=JINJA_LOADER)
+DB_FILEPATH   = join(ROOT, 'social.db')
+
+DB            = pickledb.load(DB_FILEPATH, False)
+
+
+def get_template(template_name):
+    with open(join(TEMPLATE_ROOT, template_name)) as f:
+        return JINJA_ENV.from_string(f.read())
+
 
 class SocialButtons(object):
 
     @cherrypy.expose
     def index(self):
-        return open(join(root, join('templates', 'index.html')))
+        return get_template('index.html').render()
 
     @cherrypy.expose
     def login(self):
-        return open(join(root, join('templates', 'login.html')))
+        return get_template('login.html').render()
 
     @cherrypy.expose
     def register(self):
-        return open(join(root, join('templates', 'register.html')))
+        return get_template('register.html').render()
 
 
 def app():
-    cherrypy.quickstart(SocialButtons(), '/', cherry_conf(root))
+    cherrypy.quickstart(SocialButtons(), '/', cherry_conf(ROOT))
