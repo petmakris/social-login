@@ -1,131 +1,161 @@
-var google_client_id = '';
-var facebook_app_id = '';
+var google_client_id = '315004607505-k9m58flrf24nrjdpqmbp5p6pfmfpmvvt.apps.googleusercontent.com';
+var facebook_app_id = '341008546449852';
 
-function googleLoginInit() {
-	gapi.load('auth2', function() {
-		auth2 = gapi.auth2.init({
-			client_id: google_client_id,
-			fetch_basic_profile: true,
-			scope: 'openid'
-		});
-	});
-}
+gapi.load('auth2', function () {
 
-window.fbAsyncInit = function() {
-	FB.init({
-	appId   : facebook_app_id,
-	cookie  : true,
-	xfbml   : true,
-	version : 'v2.8'
-	});
+    console.log(':: google init()')
+ 
+    auth2 = gapi.auth2.init({
+        client_id: google_client_id,
+        fetch_basic_profile: true,
+        scope: 'openid'
+    });
+});
+
+setTimeout(function() {
+    if(gapi.auth2.getAuthInstance().isSignedIn.get()) {
+        $('.google-status i.fab').addClass('text-success');
+    }
+}, 1000);
+
+
+(function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s);
+    js.id = id;
+    js.src = "https://connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+
+window.fbAsyncInit = function () {
+
+    console.log(':: facebook init()')
+
+    FB.init({
+        appId: facebook_app_id,
+        cookie: true,
+        xfbml: true,
+        version: 'v2.8'
+    });
+
+    FB.getLoginStatus(function (statusResponse) {
+        if (statusResponse['status'] == 'connected') {
+            $('.facebook-status i.fab').addClass('text-success');
+        } 
+    });
+
 };
+
+function hideRegistrationElements() {
+
+    $('form#register div#social-buttons').hide();
+    $('form#register div.first_name').hide();
+    $('form#register div.last_name').hide();
+    $('form#register div.email').hide();
+    $('form#register div.password').hide();
+}
 
 function configureSignupFormDetails(auth) {
 
-	$('form#signup div#social-buttons').hide();
-
-	$('form#signup div.first_name').hide();
-	$('form#signup div.last_name').hide();
-	$('form#signup div.username').hide();
-
-	$('form#signup span#welcome_message_1').text('Welcome ' + auth.first_name + ' ' + auth.last_name + '!');
-	$('form#signup span#welcome_message_2').text('Please complete the following information to complete registration.');
-
-	$('form#signup input#vid').val(auth.vid);
-	$('form#signup input#vendor').val(auth.vendor);
-
-	$('form#signup input#first_name').val(auth.first_name);
-	$('form#signup input#last_name').val(auth.last_name);
-
-	$('form#signup input#username').val(auth.email);
-
-
-	$('form#signup input#picture').val(auth.picture);
+    $('form#register input#vid').val(auth.vid);
+    $('form#register input#vendor').val(auth.vendor);
+    $('form#register input#first_name').val(auth.first_name);
+    $('form#register input#last_name').val(auth.last_name);
+    $('form#register input#email').val(auth.email);
 }
 
 
 function googleSigninRequest(callback) {
-	var auth2 = gapi.auth2.getAuthInstance();
-	auth2.signIn().then(function() {
-		var google_user = auth2.currentUser.get();
-		var id_token = google_user.getAuthResponse().id_token;
-		callback(id_token);
-	});
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signIn().then(function () {
+        var google_user = auth2.currentUser.get();
+        var id_token = google_user.getAuthResponse().id_token;
+        callback(id_token);
+    });
 }
 
 function facebookSigninRequest(callback) {
-	FB.login(function(fbSigninResponse) {
-		if (fbSigninResponse.status === 'connected') {
-			var access_token = fbSigninResponse.authResponse.accessToken;
-			callback(access_token);
-		}
-	}, {scope: 'public_profile,email'});
-}
 
-$().ready(function() {
-    /*
+    var loginHandler = function (fbSigninResponse) {
+        if (fbSigninResponse.status === 'connected') {
+            var access_token = fbSigninResponse.authResponse.accessToken;
+            callback(access_token);
+        }
+    };
 
-	$('a.social-btn-google').click(function() {
+    var loginParams = {
+        scope: 'public_profile,email'
+    };
 
-		var isLoginBtn = $(this).hasClass('social-btn-login');
-		var endUrl = $(this).attr('end-url');
+    FB.login(loginHandler, loginParams);
+};
 
-		googleSigninRequest(function(id_token) {
-			$.get('/cfc/users.cfc?method=handlegooglesignin', {'id_token': id_token})
-				.done(function (authResponse) {
-						if (authResponse.status == 'connected') {
-							window.location.href = endUrl;
-						} else {
-							if (isLoginBtn) {
-								window.location.href = '/sign_up/create_account?' + $.param(authResponse);
-							} else {
-								configureSignupFormDetails(authResponse);
-							}
-						}
-					});
-		})
-	})
+$().ready(function () {
 
-	$('a.social-btn-facebook').click(function() {
+    $('a.social-btn-google').click(function () {
+        var isLoginBtn = $(this).hasClass('social-btn-login');
 
-		var isLoginBtn = $(this).hasClass('social-btn-login');
-		var endUrl = $(this).attr('end-url');
+        googleSigninRequest(function (id_token) {
+            $.get('/google?', {
+                    'id_token': id_token
+                })
+                .done(function (authResponse) {
+                    if (authResponse.status == 'connected') {
+                        window.location.href = '/';
+                    } else {
+                        if (isLoginBtn) {
+                             window.location.href = '/register?' + $.param(authResponse);
+                        } else {
+                            hideRegistrationElements();
+                            configureSignupFormDetails(authResponse);
+                        }
+                    }
+                });
+        })
+    })
 
-		facebookSigninRequest(function (access_token) {
-			$.get('/cfc/users.cfc?method=handlefacebooksignin', {'accessToken': access_token})
-				.done(function (authResponse) {
-					if (authResponse.status == 'connected') {
-						window.location.href = endUrl;
-					} else {
-						if (isLoginBtn) {
-							window.location.href = '/sign_up/create_account?' + $.param(authResponse);
-						} else {
-							configureSignupFormDetails(authResponse);
-						}
-					}
-				});
-			})
-	})
+    $('a.social-btn-facebook').click(function () {
 
-    */
+        var isLoginBtn = $(this).hasClass('social-btn-login');
 
-	/*
-	$('#signoutButton').click(function() {
-		var auth2 = gapi.auth2.getAuthInstance();
+        facebookSigninRequest(function (access_token) {
+            $.get('/facebook?', {
+                    'access_token': access_token
+                })
+                .done(function (authResponse) {
+                    if (authResponse.status == 'connected') {
+                        window.location.href = '/';
+                    } else {
+                        if (isLoginBtn) {
+                            window.location.href = '/register?' + $.param(authResponse);
+                        } else {
+                            hideRegistrationElements();
+                            configureSignupFormDetails(authResponse);
+                        }
+                    }
+                });
+        })
+    })
 
-		auth2.signOut().then(function () {
-			console.log('google-sign-out');
-		});
+    $('#signoutButton').click(function () {
+        var auth2 = gapi.auth2.getAuthInstance();
 
-		FB.getLoginStatus(function(statusResponse) {
-			if (statusResponse['status'] == 'connected') {
-				FB.logout(function(logoutResponse) {
-					console.log('facebook-sign-out', logoutResponse);
-				})
-			}
-		});
+        auth2.signOut().then(function () {
+            $('.google-status i.fab').removeClass('text-success');
+        });
 
-		window.location.href = '/';
-	});
-	*/
+        FB.getLoginStatus(function (statusResponse) {
+            if (statusResponse['status'] == 'connected') {
+                FB.logout(function (logoutResponse) {
+                    $('.facebook-status i.fab').removeClass('text-success');
+                })
+            }
+        });
+
+        $.get('/logout');
+        // window.location.href = '/';
+    });
+
+
 })

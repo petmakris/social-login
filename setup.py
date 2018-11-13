@@ -8,7 +8,8 @@ setup(
     install_requires = [
         'cherrypy==18.0.1',
         'jinja2==2.10',
-        'pickledb==0.8.1'
+        'pickledb==0.8.1',
+        'requests==2.20.1'
     ],
 
     entry_points = {

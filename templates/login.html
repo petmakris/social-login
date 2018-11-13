@@ -1,0 +1,46 @@
+{% include 'head.html' %}
+
+<body>
+{% include 'nav.html' %}
+
+<div class="card" style="width: 22rem;">
+    <div class="card-body">
+        <h5 class="card-title">Login</h5>
+
+        <form>
+            <div id="social-buttons">
+                <div class="form-group">
+                    <a href="#" class="social-btn social-btn-google social-btn-login">
+                        <i class="fab fa-google fa-lg"></i> &nbsp;&nbsp; Continue with Google
+                    </a>
+                    <a href="#" class="social-btn social-btn-facebook social-btn-login">
+                        <i class="fab fa-facebook-f fa-lg"></i> &nbsp;&nbsp; Continue with Facebook
+                    </a>
+                    <br>
+                    <p class="card-text text-center">or</p>
+                </div>
+            </div>
+    
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="name@example.com"
+                    autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" autocomplete="off">
+            </div>
+
+            <input type="hidden" id="vendor"  name="vendor"    value="">
+            <input type="hidden" id="vid"     name="vid" value="">
+            <input type="hidden" id="picture" name="picture"   value="">
+
+            <div class="text-right">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+</div>
+
+</body>
+</html>

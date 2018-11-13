@@ -1,51 +1,73 @@
 {% include 'head.html' %}
 
 <body>
-    {% include 'nav.html' %}
+{% include 'nav.html' %}
 
 
-    <div class="card" style="width: 18rem;">
-        <div class="card-body">
-            <h5 class="card-title">Social Buttons App</h5>
-            <h6 class="card-subtitle mb-2 text-muted">Register for account</h6>
+{% if vendor is defined %}
+<script>
+    $(function() {
+        hideRegistrationElements();
+    })
+</script>
+{% endif %}
 
-            <form>
 
-                <div id="social-buttons">
-                    <div class="form-group">
-                        <p class="card-text">Use social login</p>
-                        <a href="#" class="social-btn social-btn-google" endurl="/">
-                            <i class="fab fa-google fa-lg"></i> &nbsp;&nbsp; Continue with Google
-                        </a>
-                        <a href="#" class="social-btn social-btn-facebook" endurl="/">
-                            <i class="fab fa-facebook-f fa-lg"></i> &nbsp;&nbsp; Continue with Facebook
-                        </a>
-                        <br>
-                        <p class="card-text text-center">or</p>
-                    </div>
-                </div>
-        
-        
+<div class="card" style="width: 22rem;">
+    <div class="card-body">
+        <h5 class="card-title">Register</h5>
+
+        <form id="register">
+            <div id="social-buttons">
                 <div class="form-group">
-                    <label for="email">Email address</label>
-                    <input type="email" class="form-control" id="exampleInputEmail1" placeholder="name@example.com">
+                    <a href="#" class="social-btn social-btn-google">
+                        <i class="fab fa-google fa-lg"></i> &nbsp;&nbsp; Continue with Google
+                    </a>
+                    <a href="#" class="social-btn social-btn-facebook">
+                        <i class="fab fa-facebook-f fa-lg"></i> &nbsp;&nbsp; Continue with Facebook
+                    </a>
+                    <br>
+                    <p class="card-text text-center">or</p>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="">
-                </div>
+            <div class="form-group">
+                <label for="devlang">Favorite Language</label>
+                <input type="text" class="form-control" id="devlang" placeholder="Python" autocomplete="off">
+            </div>
 
-                <input type="hidden" id="vendor"  name="vendor"    value="">
-                <input type="hidden" id="vid"     name="vid" value="">
-                <input type="hidden" id="picture" name="picture"   value="">
+            <div class="form-group first_name">
+                <label for="first_name">First name</label>
+                <input type="text" class="form-control" id="first_name" value="{{first_name}}" autocomplete="off">
+            </div>
 
-                <div class="text-right">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
-            </form>
+            <div class="form-group last_name">
+                <label for="first_name">Email address</label>
+                <input type="text" class="form-control" id="last_name" value="{{last_name}}" autocomplete="off">
+            </div>
+    
 
-    </div>
+
+            <div class="form-group email">
+                <label for="email">Email address</label>
+                <input type="email" class="form-control" id="email" value="{{email}}" autocomplete="off">
+            </div>
+
+            <div class="form-group password">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" autocomplete="off">
+            </div>
+
+            <input type="hidden" id="vendor"  name="vendor" value="{{vendor}}">
+            <input type="hidden" id="vid"     name="vid"    value="{{vid}}">
+            <input type="hidden" id="token"   name="token"  value="{{token}}">
+
+            <div class="text-right">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+
+</div>
 
 </body>
 </html>
