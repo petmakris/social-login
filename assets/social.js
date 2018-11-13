@@ -12,6 +12,7 @@ gapi.load('auth2', function () {
     });
 });
 
+
 setTimeout(function() {
     if(gapi.auth2.getAuthInstance().isSignedIn.get()) {
         $('.google-status i.fab').addClass('text-success');
@@ -27,6 +28,7 @@ setTimeout(function() {
     js.src = "https://connect.facebook.net/en_US/sdk.js";
     fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));
+
 
 window.fbAsyncInit = function () {
 
@@ -154,8 +156,27 @@ $().ready(function () {
         });
 
         $.get('/logout');
-        // window.location.href = '/';
+            window.location.href = '/';
     });
 
+
+    $("form#register").submit(function(e) {
+
+        console.log('comes from this');
+
+        var form = $(this);
+        var url = form.attr('action');
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: form.serialize(),
+            success: function(data) {
+                console.log(data)
+                }
+            });
+
+        e.preventDefault();
+    });
 
 })

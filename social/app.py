@@ -10,6 +10,7 @@ from social.conf import get_session_id
 from social.conf import render
 from social.conf import read_file_as_json
 from social.conf import start_server
+from social.conf import dump
 
 from social.auth_tools import google_jwt_to_auth_object
 from social.auth_tools import facebook_token_to_auth_object
@@ -39,10 +40,6 @@ class SocialButtons(object):
         return render(TEMPLATES, 'register.html', url_params)
 
     @cherrypy.expose
-    def createUser(self, **url_params):
-        return 'done'
-
-    @cherrypy.expose
     @cherrypy.tools.json_out()
     def google(self, id_token):
         return google_jwt_to_auth_object(id_token)
@@ -55,6 +52,11 @@ class SocialButtons(object):
     @cherrypy.expose
     def logout(self):
         return ''
+
+    @cherrypy.expose
+    def create_user(self, **url_params):
+        dump(url_params)
+        return 'done'
 
 
 def app():
