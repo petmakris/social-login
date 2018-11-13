@@ -1,0 +1,89 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+        integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
+        crossorigin="anonymous">
+
+    <script src="https://apis.google.com/js/platform.js?onload=googleLoginInit" async defer></script>
+
+    <script>
+    (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "https://connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+    </script>
+    
+    <script type="application/javascript" src="/assets/social.js"></script>
+    <link rel="stylesheet" type="text/css" href="/assets/social.css" />    
+</head>
+<body>
+
+    <style>
+        body {
+            padding: 1rem;
+        }
+    </style>
+
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">Social Buttons App</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Register for account</h6>
+
+            <form>
+
+                <div id="social-buttons">
+                    <div class="form-group">
+                        <p class="card-text">Use social login</p>
+                        <a href="#" class="social-btn social-btn-google" endurl="/">
+                            <i class="fab fa-google fa-lg"></i> &nbsp;&nbsp; Continue with Google
+                        </a>
+                        <a href="#" class="social-btn social-btn-facebook" endurl="/">
+                            <i class="fab fa-facebook-f fa-lg"></i> &nbsp;&nbsp; Continue with Facebook
+                        </a>
+                        <br>
+                        <p class="card-text text-center">or</p>
+                    </div>
+                </div>
+        
+        
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1" placeholder="name@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="">
+                </div>
+
+                <input type="hidden" id="vendor"  name="vendor"    value="">
+                <input type="hidden" id="vid"     name="vid" value="">
+                <input type="hidden" id="picture" name="picture"   value="">
+
+                <div class="text-right">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+
+    </div>
+
+</body>
+</html>        

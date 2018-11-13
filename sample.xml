@@ -1,0 +1,139 @@
+<cffunction name="googleTokenHandler" type="struct">
+	<cfargument name="id_token" type="string" required="true">
+	
+	<cfset parts = listToArray(id_token, '.')>
+
+	<cfset utils = new cfc.Utils()>
+
+	<cfset responseHeader = utils.decodeBase64(parts[1])>
+	<cfset responseBody   = utils.decodeBase64(parts[2])>
+	<cfset authResponse = deserializeJSON(responseBody)>
+
+	<cfset auth = {
+		'status': '',
+		'vendor': 'google',
+		'vid': authResponse['sub'],
+		'first_name': authResponse['given_name'],
+		'last_name': authResponse['family_name'],
+		'email': authResponse['email'],
+		'picture': authResponse['picture']
+	}>
+	<cfset auth.setMetadata({ "vid": { type: "string"} })>
+	<cfreturn auth>
+</cffunction>
+
+
+<cffunction name="facebookTokenHandler" type="struct">
+	<cfargument name="accessToken" type="string" required="true">
+
+	<cfset meRequestUrl = new cfc.UrlBuilder('https://graph.facebook.com/me')
+		.appendParameter('fields', 'email,name,first_name,last_name')
+		.appendParameter('access_token', accessToken)
+		.get()>
+
+	<cfhttp url="#meRequestUrl#" result="local.meResult" />
+
+	<cfset authResponse = deserializeJson(local.meResult.fileContent)>
+	<cfset auth = {
+		'status': '',
+		'vendor': 'facebook',
+		'vid': authResponse['id'],
+		'first_name': authResponse['first_name'],
+		'last_name': authResponse['last_name'],
+		'email': authResponse['email'],
+		'picture': '' <!--- TODO: picture not easy with facebook --->
+	}>
+	<cfset auth.setMetadata({ "vid": { type: "string"} })>
+	<cfreturn auth>
+
+</cffunction>
+
+
+
+
+
+<cffunction name="findUserByVendorId" returntype="query">
+	<cfargument name="vendor" required="true" type="string">
+	<cfargument name="vid" required="true" type="string">
+
+	<cfset vid_col = vendor & '_id'>
+	
+	<cfquery name="local.q">
+		SELECT *
+		FROM 
+			user_info
+		WHERE 
+			#vid_col# = <cfqueryparam cfsqltype="cf_sql_varchar" value="#vid#">
+		LIMIT 1;
+	</cfquery>
+	<cfreturn local.q>
+</cffunction>
+
+
+<cffunction name="loginUserAndUpdateVendor" returntype="struct">
+	<cfargument name="auth" required="true" type="struct">
+	<cfargument name="user" required="true" type="query">
+	<cfargument name="update" required="false" type="boolean" default="false">
+
+	<cfset new cfc.login().loginUser(user.username, user.password, 'true')>
+
+	<cfif update eq true>
+		<cfset updateResult = this.update({
+			'user_id': user.user_id,
+			'vendor': auth['vendor'],
+			'vid': auth['vid'],
+			'vemail': auth['email']
+		})>
+	</cfif>
+
+	<cfreturn {'status': 'connected'}>
+</cffunction>
+
+
+<cffunction name="handleUserDetails">
+	<cfargument name="auth" type="struct" required="true">
+
+	<cfset local.user = findUserByVendorId(auth['vendor'], auth['vid'])>
+
+	<cfif local.user.recordcount gt 0>
+
+		<cfreturn loginUserAndUpdateVendor(auth, user, true)>
+	</cfif>
+
+	<cfset local.user = findUserByEmail(auth['email'])>
+
+	<cfif local.user.recordcount eq 1>
+		<cfreturn loginUserAndUpdateVendor(auth, user, true)>
+
+	<cfelseif local.user.recordcount gt 1 >
+		<cfset local.user = findUserByEmailWithMostRecentLogin(auth['email'])>
+		<cfreturn loginUserAndUpdateVendor(auth, user, true)>
+	</cfif>
+
+	<cfreturn auth>
+</cffunction>
+
+<cffunction name="handleGoogleSignin"
+	returntype="string"
+	returnformat="json"
+	access="remote"
+	output="true">
+
+	<cfset auth = googleTokenHandler(arguments['id_token'])>
+
+	<cfcontent type="application/json">
+	<cfreturn serializeJson(this.handleUserDetails(auth))>
+</cffunction>
+
+
+<cffunction name="handleFacebookSignin"
+	returntype="string"
+	returnformat="json"
+	access="remote"
+	output="true">
+
+	<cfset auth = facebookTokenHandler(arguments['accessToken'])>
+
+	<cfcontent type="application/json">
+	<cfreturn serializeJson(this.handleUserDetails(auth))>
+</cffunction>
