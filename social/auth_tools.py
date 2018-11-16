@@ -3,6 +3,7 @@ import base64
 import requests
 import urllib
 
+
 def google_jwt_to_auth_object(id_token):
 
     body = id_token.split('.')[1]

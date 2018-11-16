@@ -4,17 +4,20 @@ import cherrypy
 import jinja2
 import json
 
-import json
+import logging
+import logging.config
+
+import cherrypy
 
 
-def dump(json_obj):
+def colorize(json_obj):
     from pygments import highlight
     from pygments.lexers import JsonLexer
     from pygments.formatters import TerminalFormatter
 
     json_str = json.dumps(json_obj, indent=4, sort_keys=True)
 
-    print(highlight(json_str, JsonLexer(), TerminalFormatter()))
+    return highlight(json_str, JsonLexer(), TerminalFormatter())
 
 
 def render(template_root, template_name, model=None):
@@ -41,6 +44,7 @@ def read_file_as_json(creds):
 
 
 def start_server(root_path, root_object):
+
     cherrypy.server.ssl_module = 'builtin'
     cherrypy.server.ssl_certificate = os.path.join(root_path, 'cert.pem')
     cherrypy.server.ssl_private_key = os.path.join(root_path, 'privkey.pem')
@@ -60,5 +64,16 @@ def start_server(root_path, root_object):
         'server.socket_port': 443,
         'engine.autoreload.on': False
     })
-
+    
+    cherrypy.config.update({
+        'log.screen': False,
+        'log.access_file': '',
+        'log.error_file': ''
+    })
+    cherrypy.engine.unsubscribe('graceful', cherrypy.log.reopen_files)
     cherrypy.quickstart(root_object, '/', conf)
+
+
+
+
+
