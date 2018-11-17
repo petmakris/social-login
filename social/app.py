@@ -28,12 +28,10 @@ CREDENTIALS   = read_file_as_json(os.path.join(ROOT, 'credentials.json'))
 google_secret   = CREDENTIALS['google']
 facebook_secret = CREDENTIALS['facebook']
 
-
 class SocialButtons(object):
 
     def __init__(self):
         self.users = Users()
-
 
     @cherrypy.expose
     def index(self):
@@ -52,34 +50,17 @@ class SocialButtons(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def token(self, vendor_data):
-        if vendor_data['vendor'] == 'google':
-            auth = google_jwt_to_auth_object(vendor_data['token'])
+    def token(self, vendor, token):
+        if vendor == 'google':
+            logger.info('handling google')
+            return google_jwt_to_auth_object(token)
 
-        elif vendor_data['vendor'] == 'facebook':
-            auth = facebook_token_to_auth_object(vendor_data['token'])
+        elif vendor == 'facebook':
+            logger.info('handling facebook')
+            return facebook_token_to_auth_object(token)
+
         else:
-            return { 'error': 'unknown'}
-            
-        return self.handleAuth(auth)
-
-
-
-    def handleAuth(self, auth):
-        # case should be covered: 
-        # user exists but with other vendor or email/passwd
-        # so update database information for user?
-
-        # first check vendor id, if exists then we simply login the user
-        # secondly 
-
-
-        pass
-
-        # if user is not None:
-        #     self.loginUser(auth['email'])
-        #     auth['status'] = 'connected'
-        # return auth
+            return {'error': 'unknown'}
 
 
     @cherrypy.expose

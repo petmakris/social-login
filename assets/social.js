@@ -73,10 +73,11 @@ function configureSignupFormDetails(auth) {
 
 $().ready(function () {
 
-    function handle(isLogin, tokenDetails) {
+    function responseHandler(isLogin, tokenDetails) {
         $.get('/token?', tokenDetails)
             .done(function (authResponse) {
-                console.log(authResponse)
+                console.log(authResponse);
+
                 if (authResponse.status == 'connected') {
                     window.location.href = '/';
                 } else {
@@ -87,28 +88,33 @@ $().ready(function () {
                         configureSignupFormDetails(authResponse);
                     }
                 }
+            })
+            .fail(function (err) {
+                console.error('Failed', err);
             });
     }
 
-    $('a.social-btn-google').click(function () {
-        var isLoginBtn = $(this).hasClass('social-btn-login');
+    $('a.social-btn-google').click(function (e) {
+        e.preventDefault();
 
+        var isLoginBtn = $(this).hasClass('social-btn-login');
         var auth2 = gapi.auth2.getAuthInstance();
         auth2.signIn().then(function () {
             var google_user = auth2.currentUser.get();
             var id_token = google_user.getAuthResponse().id_token;
-            handle(isLoginBtn, {'vendor': 'google', 'token': id_token})
+            responseHandler(isLoginBtn, {'vendor': 'google', 'token': id_token})
         });
+
+        return false;
     })
 
-    $('a.social-btn-facebook').click(function () {
-
+    $('a.social-btn-facebook').click(function (e) {
+        e.preventDefault();
         var isLoginBtn = $(this).hasClass('social-btn-login');
-
         var loginHandler = function (fbSigninResponse) {
             if (fbSigninResponse.status === 'connected') {
                 var access_token = fbSigninResponse.authResponse.accessToken;
-                handle(isLoginBtn, {'vendor': 'facebook', 'token': access_token});
+                responseHandler(isLoginBtn, {'vendor': 'facebook', 'token': access_token});
             }
         };
         var loginParams = {
@@ -116,11 +122,13 @@ $().ready(function () {
         };
    
         FB.login(loginHandler, loginParams);
+
+        return false;
     })
 
 
-    $('#signoutButton').click(function () {
-
+    $('#signoutButton').click(function (e) {
+        e.preventDefault();
         var auth2 = gapi.auth2.getAuthInstance();
 
         auth2.signOut().then(function () {
@@ -138,9 +146,12 @@ $().ready(function () {
         $.get('/logout');
         window.location.href = '/';
 
+        return false;
     });
 
     $("form#register").submit(function(e) {
+        e.preventDefault();
+
         var form = $(this);
         $.ajax({
             type: "POST",
@@ -150,16 +161,18 @@ $().ready(function () {
                 console.log(data)
                 }
             });
-        e.preventDefault();
+
+        return false;
     });
 
 
     $("#dump").click(function(e) {
+        e.preventDefault();
+
         $.get('/users').then(function(r) {
             console.log(r);
         })
-        
-        e.preventDefault();
+        return false;
     });
 
 
