@@ -32,27 +32,6 @@ facebook_secret = CREDENTIALS['facebook']
 def error(msg):
     return { 'error': msg }
 
-#     "devlang": "Java",
-#     "email": "petmakris@gmail.com",
-#     "first_name": "Petros",
-#     "last_name": "Makris",
-#     "password": "",
-#     "token": "",
-#     "vendor": "google",
-#     "vid": "109011938596560303242"
-
-#     "devlang": "Python",
-#     "email": "petmakris@gmail.com",
-#     "first_name": "Petros",
-#     "last_name": "Makris",
-#     "password": "",
-#     "token": "",
-#     "vendor": "facebook",
-#     "vid": "2290465577856262"
-
-
-# Bug for user storage I need two columns: facebookData!, googleData!
-
 
 class SocialButtons(object):
 
@@ -87,13 +66,12 @@ class SocialButtons(object):
     @cherrypy.tools.json_out()
     def facebook(self, access_token):
         auth = facebook_token_to_auth_object(access_token)
+
         # verify token? nope for facebook
         return self.handleAuth(auth)
 
 
     def handleAuth(self, auth):
-        user = users.get(auth['email'])
-        
         # case should be covered: 
         # user exists but with other vendor or email/passwd
         # so update database information for user?
@@ -102,10 +80,12 @@ class SocialButtons(object):
         # secondly 
 
 
-        if user is not None:
-            self.loginUser(auth['email'])
-            auth['status'] = 'connected'
-        return auth
+        pass
+
+        # if user is not None:
+        #     self.loginUser(auth['email'])
+        #     auth['status'] = 'connected'
+        # return auth
 
 
     @cherrypy.expose
@@ -128,27 +108,28 @@ class SocialButtons(object):
 
 
     def registerWithVendor(self, params):
-        user = users.get(params['email'])
+
+        user = ''
 
         # validate form data
         if user is None:
             return self.registerWithEmailAndPassword(params)
         else:
-            user['vendor'] = params['vendor']
-            user['vid'] = params['vid']
-            users[params['email']] = user
             logger.info('User [%s] already exists, merged')
             return {}
 
 
     def registerWithEmailAndPassword(self, params):
         email = params['email']
-        if users.get(email) is None:
-            users[email] = params
-            logger.info('Registered user [%s]' % params['email'])
-            return {}
-        else:
-            return error('User [%s] already exists' % email)
+
+
+
+        # if users.get(email) is None:
+        #     users[email] = params
+        #     logger.info('Registered user [%s]' % params['email'])
+        #     return {}
+        # else:
+        #     return error('User [%s] already exists' % email)
 
 
 
