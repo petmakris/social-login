@@ -12,6 +12,7 @@ def google_jwt_to_auth_object(id_token):
     auth_response = json.loads(base64.b64decode(body))
     
     return {
+        'status': '',
         'vid': auth_response['sub'],
         'vendor': 'google',
         'first_name': auth_response['given_name'],
@@ -31,6 +32,7 @@ def facebook_token_to_auth_object(access_token):
     if req.status_code is 200:
         auth_response = req.json()
         return {
+            'status': '',
             'vid': auth_response['id'],
             'vendor': 'facebook',
             'first_name': auth_response['first_name'],
@@ -39,5 +41,5 @@ def facebook_token_to_auth_object(access_token):
             'token': access_token
         }
     else:
-        print('error')
-        return {}
+        raise Exception('Facebook request failed')
+        

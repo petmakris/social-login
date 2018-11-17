@@ -8,13 +8,14 @@ setup(
     install_requires = [
         'cherrypy==18.0.1',
         'jinja2==2.10',
-        'pickledb==0.8.1',
-        'requests==2.20.1'
+        'requests==2.20.1',
+        'mysql-connector==2.1.6'
     ],
 
     entry_points = {
         'console_scripts': [
             'serve = social.app:app',
+            'users = social.users:app',
         ]
     }
 )

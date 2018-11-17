@@ -21,7 +21,7 @@
         <h5 class="card-title">Register</h5>
 
         <form id="register"
-            action="/create_user"
+            action="/createUser"
             method="GET">
 
             <div id="social-buttons">
@@ -39,27 +39,27 @@
 
             <div class="form-group">
                 <label for="devlang">Favorite Language</label>
-                <input type="text" class="form-control" name="devlang" id="devlang" placeholder="Python" autocomplete="off">
+                <input type="text" class="form-control" name="devlang" id="devlang" placeholder="Python" pattern="[a-zA-Z]{1,64}" required>
             </div>
 
             <div class="form-group first_name">
                 <label for="first_name">First name</label>
-                <input type="text" class="form-control" name="first_name" id="first_name" value="{{first_name}}" autocomplete="off">
+                <input type="text" class="form-control" name="first_name" id="first_name" value="{{first_name}}" pattern="[\S]{3,64}" required>
             </div>
 
             <div class="form-group last_name">
-                <label for="first_name">Email address</label>
-                <input type="text" class="form-control" name="last_name" id="last_name" value="{{last_name}}" autocomplete="off">
+                <label for="last_name">Last name</label>
+                <input type="text" class="form-control" name="last_name" id="last_name" value="{{last_name}}" pattern="[a-zA-Z]{3,64}" required>
             </div>
 
             <div class="form-group email">
                 <label for="email">Email address</label>
-                <input type="email" class="form-control" name="email" id="email" value="{{email}}" autocomplete="off">
+                <input type="email" class="form-control" name="email" id="email" value="{{email}}" required>
             </div>
 
             <div class="form-group password">
                 <label for="password">Password</label>
-                <input type="password" class="form-control" name="password" id="password" autocomplete="off">
+                <input type="password" class="form-control" name="password" id="password" required>
             </div>
 
             <input type="hidden" id="vendor"  name="vendor" value="{{vendor}}">
