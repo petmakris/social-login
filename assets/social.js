@@ -71,79 +71,56 @@ function configureSignupFormDetails(auth) {
 }
 
 
-function googleSigninRequest(callback) {
-    var auth2 = gapi.auth2.getAuthInstance();
-    auth2.signIn().then(function () {
-        var google_user = auth2.currentUser.get();
-        var id_token = google_user.getAuthResponse().id_token;
-        callback(id_token);
-    });
-}
-
-function facebookSigninRequest(callback) {
-
-    var loginHandler = function (fbSigninResponse) {
-        if (fbSigninResponse.status === 'connected') {
-            var access_token = fbSigninResponse.authResponse.accessToken;
-            callback(access_token);
-        }
-    };
-    var loginParams = {
-        scope: 'public_profile,email'
-    };
-
-    FB.login(loginHandler, loginParams);
-};
-
 $().ready(function () {
+
+    function handle(isLogin, tokenDetails) {
+        $.get('/token?', tokenDetails)
+            .done(function (authResponse) {
+                console.log(authResponse)
+                if (authResponse.status == 'connected') {
+                    window.location.href = '/';
+                } else {
+                    if (isLogin) {
+                            window.location.href = '/register?' + $.param(authResponse);
+                    } else {
+                        hideRegistrationElements();
+                        configureSignupFormDetails(authResponse);
+                    }
+                }
+            });
+    }
 
     $('a.social-btn-google').click(function () {
         var isLoginBtn = $(this).hasClass('social-btn-login');
 
-        googleSigninRequest(function (id_token) {
-            $.get('/google?', {
-                    'id_token': id_token
-                })
-                .done(function (authResponse) {
-                    console.log(authResponse)
-                    if (authResponse.status == 'connected') {
-                        window.location.href = '/';
-                    } else {
-                        if (isLoginBtn) {
-                             window.location.href = '/register?' + $.param(authResponse);
-                        } else {
-                            hideRegistrationElements();
-                            configureSignupFormDetails(authResponse);
-                        }
-                    }
-                });
-        })
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signIn().then(function () {
+            var google_user = auth2.currentUser.get();
+            var id_token = google_user.getAuthResponse().id_token;
+            handle(isLoginBtn, {'vendor': 'google', 'token': id_token})
+        });
     })
 
     $('a.social-btn-facebook').click(function () {
 
         var isLoginBtn = $(this).hasClass('social-btn-login');
 
-        facebookSigninRequest(function (access_token) {
-            $.get('/facebook?', {
-                    'access_token': access_token
-                })
-                .done(function (authResponse) {
-                    if (authResponse.status == 'connected') {
-                        window.location.href = '/';
-                    } else {
-                        if (isLoginBtn) {
-                            window.location.href = '/register?' + $.param(authResponse);
-                        } else {
-                            hideRegistrationElements();
-                            configureSignupFormDetails(authResponse);
-                        }
-                    }
-                });
-        })
+        var loginHandler = function (fbSigninResponse) {
+            if (fbSigninResponse.status === 'connected') {
+                var access_token = fbSigninResponse.authResponse.accessToken;
+                handle(isLoginBtn, {'vendor': 'facebook', 'token': access_token});
+            }
+        };
+        var loginParams = {
+            scope: 'public_profile,email'
+        };
+   
+        FB.login(loginHandler, loginParams);
     })
 
+
     $('#signoutButton').click(function () {
+
         var auth2 = gapi.auth2.getAuthInstance();
 
         auth2.signOut().then(function () {
@@ -159,9 +136,9 @@ $().ready(function () {
         });
 
         $.get('/logout');
-            window.location.href = '/';
-    });
+        window.location.href = '/';
 
+    });
 
     $("form#register").submit(function(e) {
         var form = $(this);

@@ -29,10 +29,6 @@ google_secret   = CREDENTIALS['google']
 facebook_secret = CREDENTIALS['facebook']
 
 
-def error(msg):
-    return { 'error': msg }
-
-
 class SocialButtons(object):
 
     def __init__(self):
@@ -56,19 +52,17 @@ class SocialButtons(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def google(self, id_token):
-        auth = google_jwt_to_auth_object(id_token)
-        # verify token?
+    def token(self, vendor_data):
+        if vendor_data['vendor'] == 'google':
+            auth = google_jwt_to_auth_object(vendor_data['token'])
+
+        elif vendor_data['vendor'] == 'facebook':
+            auth = facebook_token_to_auth_object(vendor_data['token'])
+        else:
+            return { 'error': 'unknown'}
+            
         return self.handleAuth(auth)
 
-
-    @cherrypy.expose
-    @cherrypy.tools.json_out()
-    def facebook(self, access_token):
-        auth = facebook_token_to_auth_object(access_token)
-
-        # verify token? nope for facebook
-        return self.handleAuth(auth)
 
 
     def handleAuth(self, auth):
@@ -108,7 +102,6 @@ class SocialButtons(object):
 
 
     def registerWithVendor(self, params):
-
         user = ''
 
         # validate form data
@@ -122,18 +115,15 @@ class SocialButtons(object):
     def registerWithEmailAndPassword(self, params):
         email = params['email']
 
-
-
         # if users.get(email) is None:
         #     users[email] = params
         #     logger.info('Registered user [%s]' % params['email'])
         #     return {}
         # else:
-        #     return error('User [%s] already exists' % email)
+        #     return { 'error': 'User [%s] already exists' % email }
 
 
 
 def app():
-    print(Users())
-    # start_server(ROOT, SocialButtons())
+    start_server(ROOT, SocialButtons())
 

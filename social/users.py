@@ -1,8 +1,9 @@
 import os
+import json
 import mysql.connector
 from social.conf import read_file_as_json
 from jinja2 import Template
-from social.SqlDAO import *
+from social.MiniDAO import *
 
 import logging
 logger = logging.getLogger(__name__)
@@ -10,67 +11,75 @@ logger = logging.getLogger(__name__)
 ROOT        = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 CREDENTIALS = read_file_as_json(os.path.join(ROOT, 'credentials.json'))
 
-COLUMNS = [
-    'first_name',
-    'last_name',
-    'email',
-    'password',
-    'devlang',
-    'google_id',
-    'google_email',
-    'facebook_id',
-    'facebook_email'
-]
 
-class Users(SqlDAO):
+class User(object):
+
+    def __init__(self, first_name=None, last_name=None, email=None,
+                       password=None, devlang=None,
+                       google_id=None, google_email=None,
+                       facebook_id=None, facebook_email=None,
+                       user_id=None):
+
+        self.user_id = user_id
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email = email
+        self.password = password
+        self.devlang = devlang
+        self.google_id = google_id
+        self.google_email = google_email
+        self.facebook_id = facebook_id
+        self.facebook_email = facebook_email
+
+    def __str__(self):
+        return json.dumps(self.__dict__)
+
+    @classmethod
+    def columns(cls):
+        return [
+            'first_name', 'last_name', 'email', 'password', 'devlang',
+            'google_id', 'google_email', 'facebook_id', 'facebook_email',
+            'user_id',
+        ]
+
+class Users(MiniDAO):
 
     def __init__(self):
         super(Users, self).__init__(
             database='socialbuttons',
             table = 'users',
-            columns=COLUMNS,
+            clasz = User,
             username=CREDENTIALS['mysql-username'],
-            password=CREDENTIALS['mysql-password'])
+            password=CREDENTIALS['mysql-password'],
+            verbose=False)
 
 
-    def create(self, *values):
-        cur = self.con.cursor()
-        
-        valuables = ', '.join(['%s' for j in values])
-
-        q = self.render(
-            'INSERT INTO {{table}} ({{all}}) VALUES ({{values}})',
-            values=valuables)
-
-        v = values
-
-        self.execute(cur, q, v)
-        self.con.commit()
-        return cur.lastrowid
+    def findById(self, user_id):
+        return self.findBy('user_id', user_id, limit=1)
 
 
-    def findById(self, user_id, limit=None, oper=EQ):
-        return self.findBy('user_id', user_id, limit, oper)
+    def findByGoogleId(self, google_id):
+        return self.findBy('google_id', google_id, limit=1)
 
 
-    def findByGoogleId(self, google_id, limit=None, oper=EQ):
-        return self.findBy('google_id', google_id, limit, oper)
+    def findByGoogleEmail(self, google_email):
+        return self.findBy('google_email', google_email, limit=1)
 
 
-    def findByFacebookId(self, facebook_id, limit=None, oper=EQ):
-        return self.findBy('facebook_id', facebook_id, limit, oper)
+    def findByFacebookId(self, facebook_id):
+        return self.findBy('facebook_id', facebook_id, limit=1)
 
 
-    def findByEmail(self, email, limit=None, oper=EQ):
-        return self.findBy('email', email, limit, oper)
+    def findByFacebookEmail(self, facebook_email):
+        return self.findBy('facebook_email', facebook_email, limit=1)
+
+
+    def findByEmail(self, email):
+        return self.findBy('email', email, limit=1)
 
 
     def findAll(self):
         return self.findBy('user_id', 0, None, oper=GT)
-
-
-    def update(self, user_id, ):
-        pass
 
 
 
@@ -80,10 +89,19 @@ def app():
     users = Users()
     users.removeAll()
 
-    n = users.create('petros', 'makris', 
-        'petmakris@gmail.com', 'pass', 'devlang',
-        'google_id', 'google_email', 'facebook_id', 'facebook_email')
+    users.create(User('A', 'AL', '1@google.com', 'pass', 'C', '101', '1@google.com', '1001', '1@facebook.com'))
+    users.create(User('B', 'BL', '2@google.com', 'pass', 'C', '102', '2@google.com', '1002', '2@facebook.com'))
+    users.create(User('C', 'CL', '3@google.com', 'pass', 'C', '103', '3@google.com', '1003', '3@facebook.com'))
+    users.create(User('D', 'DL', '4@google.com', 'pass', 'C', '104', '4@google.com', '1004', '4@facebook.com'))
+    users.create(User('E', 'EL', '5@google.com', 'pass', 'C', '105', '5@google.com', '1005', '5@facebook.com'))
+    users.create(User('F', 'FL', '6@google.com', 'pass', 'C', '106', '6@google.com', '1006', '6@facebook.com'))
 
-    r = users.findAll()
-    print(r)
+    assert len(users.findAll()) is 6
+
+    u = users.findByEmail('5@google.com')
+    u.google_id = 'new_google_id'
+    users.update(u)
+
+    assert users.findByGoogleId('new_google_id').user_id == u.user_id
+
 
