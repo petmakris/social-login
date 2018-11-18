@@ -38,7 +38,7 @@ setTimeout(function() {
 
 window.fbAsyncInit = function () {
     FB.init({
-        appId: facebook_app_id,
+        appId: facebook_client_id,
         cookie: true,
         xfbml: true,
         version: 'v2.8'

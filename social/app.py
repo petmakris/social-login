@@ -29,23 +29,19 @@ CREDENTIALS   = read_file_as_json(os.path.join(ROOT, 'credentials.json'))
 VENDORS       = ['google', 'facebook']
 
 google_client_id   = CREDENTIALS['google-client-id']
-google_secret      = CREDENTIALS['google-secrect']
+google_secret      = CREDENTIALS['google-secret']
 
-facebook_client_id = CREDENTIALS['facebook-cliend-id']
-facebook_secret    = CREDENTIALS['facebook-secrect']
+facebook_client_id = CREDENTIALS['facebook-client-id']
+facebook_secret    = CREDENTIALS['facebook-secret']
 
 
 def config():
     return {
         'google-client-id': google_client_id,
-        'facebook-client-id': facebook_client_id
+        'facebook-client-id': facebook_client_id,
+        'cache-version': int(time.time() * 10.0)
     }
 
-
-# if 'sessionid' not in cherrypy.session:
-#     cherrypy.session['sessionid'] = uuid.uuid4()
-
-# return cherrypy.session['sessionid']
 
 class SocialButtons(object):
 
@@ -75,11 +71,10 @@ class SocialButtons(object):
 
     def model(self, model_data={}):
         m = {
-            'config': config(),
-            'version': int(time.time() * 10.0),
             'connected': self.isConnected(),
             'user': self.currentUser(),
-            'data': model_data
+            'data': model_data,
+            'config': config()
         }
         return m
 
