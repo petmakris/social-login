@@ -102,11 +102,11 @@ class SocialButtons(object):
     @cherrypy.tools.json_out()
     def token(self, vendor, token):
         if vendor == 'google':
-            auth = googleTokenToAuthObject(token)
+            auth = googleTokenToAuthObject(token, google_client_id, google_secret)
             return self.handleAuth(auth)
 
         elif vendor == 'facebook':
-            auth = facebookTokenToAuthObject(token)
+            auth = facebookTokenToAuthObject(token, facebook_client_id, facebook_secret)
             return self.handleAuth(auth)
         else:
             return { 'error': 'Unknown Vendor [%s]' % vendor }
@@ -173,11 +173,11 @@ class SocialButtons(object):
         user = User.getUserFromAuthObject(auth)
 
         if auth['vendor'] == 'google':
-            if not isValidGoogleAuthObject(auth, google_client_id):
+            if not isValidGoogleAuthObject(auth['token'], google_client_id, google_secret):
                 return { 'error': 'Invalid token' }
 
         elif auth['vendor'] == 'facebook':
-            if not isValidFacebookAuthObject(auth, facebook_client_id, facebook_secret):
+            if not isValidFacebookAuthObject(auth['token'], facebook_client_id, facebook_secret):
                 return {'error': 'Invalid token' }
 
 

@@ -12,61 +12,68 @@ from google.auth.transport import requests as google_requests
 
 # https://developers.google.com/identity/sign-in/web/backend-auth
 
-def isValidGoogleAuthObject(auth, client_id):
+# inspect token:
+#
+# r = requests.get('https://www.googleapis.com/oauth2/v3/tokeninfo?' + urllib.parse.urlencode({
+#     'id_token': auth['token'],
+# }))
+
+# if r.status_code is not 200:
+#     logger.error('Invalid Token')
+#     return False
+
+# d = r.json()
+
+# return all([
+#     d['iss'] in ['accounts.google.com', 'https://accounts.google.com'],
+#     d['aud'] == client_id,
+#     d['sub'] == auth['vid'],
+# ])
+
+
+
+def isValidGoogleAuthObject(token, google_client_id, google_secret):
     try:
         # verify signature
         request = google_requests.Request()
-        idinfo = id_token.verify_oauth2_token(auth['token'], request, client_id)
+        idinfo = id_token.verify_oauth2_token(token, request, google_client_id)
 
         if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
             raise ValueError()
 
         return True
 
-        # inspect token
-        # r = requests.get('https://www.googleapis.com/oauth2/v3/tokeninfo?' + urllib.parse.urlencode({
-        #     'id_token': auth['token'],
-        # }))
-
-        # if r.status_code is not 200:
-        #     logger.error('Invalid Token')
-        #     return False
-
-        # d = r.json()
-
-        # return all([
-        #     d['iss'] in ['accounts.google.com', 'https://accounts.google.com'],
-        #     d['aud'] == client_id,
-        #     d['sub'] == auth['vid'],
-        # ])
-
     except:
         logger.info('Error validating token')
         return False
 
 
-def googleTokenToAuthObject(id_token):
+def googleTokenToAuthObject(id_token, google_client_id, google_secret):
 
     body = id_token.split('.')[1]
     body += '=' * ((4- len(body) % 4) % 4)
 
     auth_response = json.loads(base64.b64decode(body))
     
-    return {
-        'connected': False,
-        'vid': auth_response['sub'],
-        'vendor': 'google',
-        'first_name': auth_response['given_name'],
-        'last_name': auth_response['family_name'],
-        'email': auth_response['email'],
-        'token': id_token
-    }
+    if isValidGoogleAuthObject(id_token, google_client_id, google_secret):
+        return {
+            'connected': False,
+            'vid': auth_response['sub'],
+            'vendor': 'google',
+            'first_name': auth_response['given_name'],
+            'last_name': auth_response['family_name'],
+            'email': auth_response['email'],
+            'token': id_token
+        }
+    else:
+        raise ValueError('Invalid Token')
 
 
-def isValidFacebookAuthObject(auth, facebook_client_id, facebook_secret):
+
+def isValidFacebookAuthObject(token, facebook_client_id, facebook_secret):
     try:
         r = requests.get('https://graph.facebook.com/debug_token?' + urllib.parse.urlencode({
-            'input_token': auth['token'],
+            'input_token': token,
             'access_token': '%s|%s' % (facebook_client_id, facebook_secret)
         }))
 
@@ -80,7 +87,7 @@ def isValidFacebookAuthObject(auth, facebook_client_id, facebook_secret):
         return False
 
 
-def facebookTokenToAuthObject(access_token):
+def facebookTokenToAuthObject(access_token, facebook_client_id, facebook_secret):
     me_url = 'https://graph.facebook.com/me?' + urllib.parse.urlencode({
         'fields': 'email,name,first_name,last_name',
         'access_token': access_token
@@ -90,14 +97,19 @@ def facebookTokenToAuthObject(access_token):
 
     if req.status_code is 200:
         auth_response = req.json()
-        return {
-            'connected': False,
-            'vid': auth_response['id'],
-            'vendor': 'facebook',
-            'first_name': auth_response['first_name'],
-            'last_name': auth_response['last_name'],
-            'email': auth_response['email'],
-            'token': access_token
-        }
+
+        if isValidFacebookAuthObject(access_token, facebook_client_id, facebook_secret):
+            return {
+                'connected': False,
+                'vid': auth_response['id'],
+                'vendor': 'facebook',
+                'first_name': auth_response['first_name'],
+                'last_name': auth_response['last_name'],
+                'email': auth_response['email'],
+                'token': access_token
+            }
+        else:
+            raise ValueError('Invalid Token')
+
     else:
-        raise Exception('Facebook request failed')
+        raise Exception('Invalid State')
