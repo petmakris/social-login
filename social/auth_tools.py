@@ -2,6 +2,47 @@ import json
 import base64
 import requests
 import urllib
+import logging
+
+logger = logging.getLogger(__name__)
+
+from social.conf import colorize
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
+# https://developers.google.com/identity/sign-in/web/backend-auth
+
+def isValidGoogleAuthObject(auth, client_id):
+    try:
+        # verify signature
+        request = google_requests.Request()
+        idinfo = id_token.verify_oauth2_token(auth['token'], request, client_id)
+
+        if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+            raise ValueError()
+
+        return True
+
+        # inspect token
+        # r = requests.get('https://www.googleapis.com/oauth2/v3/tokeninfo?' + urllib.parse.urlencode({
+        #     'id_token': auth['token'],
+        # }))
+
+        # if r.status_code is not 200:
+        #     logger.error('Invalid Token')
+        #     return False
+
+        # d = r.json()
+
+        # return all([
+        #     d['iss'] in ['accounts.google.com', 'https://accounts.google.com'],
+        #     d['aud'] == client_id,
+        #     d['sub'] == auth['vid'],
+        # ])
+
+    except:
+        logger.info('Error validating token')
+        return False
 
 
 def googleTokenToAuthObject(id_token):
@@ -20,6 +61,24 @@ def googleTokenToAuthObject(id_token):
         'email': auth_response['email'],
         'token': id_token
     }
+
+
+def isValidFacebookAuthObject(auth, facebook_client_id, facebook_secret):
+    try:
+        r = requests.get('https://graph.facebook.com/debug_token?' + urllib.parse.urlencode({
+            'input_token': auth['token'],
+            'access_token': '%s|%s' % (facebook_client_id, facebook_secret)
+        }))
+
+        if r.status_code is not 200:
+            raise ValueError()
+       
+        return r.json()['data']['is_valid']
+        
+    except:
+        logger.error('Error validating token')
+        return False
+
 
 def facebookTokenToAuthObject(access_token):
     me_url = 'https://graph.facebook.com/me?' + urllib.parse.urlencode({

@@ -18,21 +18,8 @@
             </li>
             {% endif %}
                 
-            {% if connected %}
-            <li class="nav-item">
-                <a class="nav-link" href="#" id="signoutButton">Logout</a>
-            </li>
-            {% endif %}
 
-            <li class="nav-item google-status">
-                <span class="nav-link disabled"><i class="fab fa-google fa-lg"></i></span>
-            </li>
-
-            <li class="nav-item facebook-status">
-                <span class="nav-link disabled"><i class="fab fa-facebook fa-lg"></i></span>
-            </li>
-
-            <li class="nav-item">
+            <li class="nav-item" style="margin-left:50px">
                 <a class="nav-link" href="" id="show-users">
                     <i class="fas fa-users"></i>
                 </a>
@@ -43,7 +30,7 @@
                     <i class="fas fa-user"></i>
                 </a>
             </li>
-    
+
             <li class="nav-item">
                 <a class="nav-link" href="" id="show-model">
                     <i class="fas fa-table"></i>
@@ -51,6 +38,10 @@
             </li>
 
             {% if connected %}
+            <li class="nav-item" style="margin-left:50px">
+                <a class="nav-link" href="#" id="signoutButton">Logout</a>
+            </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="" id="delete-user">
                     <i class="fas fa-trash" style="color:red"></i>

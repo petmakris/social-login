@@ -14,6 +14,8 @@ from social.conf import colorize
 
 from social.auth_tools import googleTokenToAuthObject
 from social.auth_tools import facebookTokenToAuthObject
+from social.auth_tools import isValidGoogleAuthObject
+from social.auth_tools import isValidFacebookAuthObject
 
 from social.user import User
 from social.users import Users
@@ -48,7 +50,7 @@ class SocialButtons(object):
         self.users = Users()
 
 
-    def isConnected(self):
+    def isLoggedIn(self):
         return session('connected') == True
 
 
@@ -69,13 +71,12 @@ class SocialButtons(object):
 
 
     def model(self, model_data={}):
-        m = {
-            'connected': self.isConnected(),
+        return {
+            'connected': self.isLoggedIn(),
             'user': self.currentUser(),
             'data': model_data,
             'config': config()
         }
-        return m
 
 
     def render(self, template, model={}):
@@ -101,9 +102,12 @@ class SocialButtons(object):
     @cherrypy.tools.json_out()
     def token(self, vendor, token):
         if vendor == 'google':
-            return self.handleAuth(googleTokenToAuthObject(token))
+            auth = googleTokenToAuthObject(token)
+            return self.handleAuth(auth)
+
         elif vendor == 'facebook':
-            return self.handleAuth(facebookTokenToAuthObject(token))
+            auth = facebookTokenToAuthObject(token)
+            return self.handleAuth(auth)
         else:
             return { 'error': 'Unknown Vendor [%s]' % vendor }
 
@@ -154,7 +158,6 @@ class SocialButtons(object):
                     u.facebook_email = auth['email']
                     self.users.update(u)
                     return self.loginUser(u)
-
             else:
                 return {
                     'connected': False,
@@ -168,8 +171,22 @@ class SocialButtons(object):
     @cherrypy.tools.json_out()
     def createUser(self, **auth):
         user = User.getUserFromAuthObject(auth)
-        user_id = self.users.create(user)
-        return self.loginUser(self.users.findById(user_id))
+
+        if auth['vendor'] == 'google':
+            if not isValidGoogleAuthObject(auth, google_client_id):
+                return { 'error': 'Invalid token' }
+
+        elif auth['vendor'] == 'facebook':
+            if not isValidFacebookAuthObject(auth, facebook_client_id, facebook_secret):
+                return {'error': 'Invalid token' }
+
+
+        u = self.users.findByEmail(auth['email'])
+        if u is None:
+            user_id = self.users.create(user)
+            return self.loginUser(self.users.findById(user_id))
+        else:
+            return {'error': 'User already exists'}
 
 
     def loginUser(self, user):
@@ -195,24 +212,26 @@ class SocialButtons(object):
     @cherrypy.tools.json_out()
     def getSession(self):
         return {
-            'connected': self.isConnected(),
+            'connected': self.isLoggedIn(),
             'user_id': self.currentUserId()
         }
+
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def getModel(self):
         return self.model()
 
+
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def deleteCurrentUser(self):
-        if self.isConnected():
+        if self.isLoggedIn():
             user_id = self.currentUserId()
             self.logout()
             self.users.deleteById(user_id)
             return { 'deleted': True }
-        
+
         return { 'error': 'Unexpected error' }
 
 

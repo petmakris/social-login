@@ -18,12 +18,6 @@ gapi.load('auth2', function () {
 });
 
 
-setTimeout(function() {
-    if(gapi.auth2.getAuthInstance().isSignedIn.get()) {
-        $('.google-status i.fab').addClass('text-success');
-    }
-}, 1000);
-
 
 (function (d, s, id) {
     var js, fjs = d.getElementsByTagName(s)[0];
@@ -44,13 +38,8 @@ window.fbAsyncInit = function () {
         version: 'v2.8'
     });
 
-    FB.getLoginStatus(function (statusResponse) {
-        if (statusResponse['connected'] == true) {
-            $('.facebook-status i.fab').addClass('text-success');
-        } 
-    });
-
 };
+
 
 function hideRegistrationElements() {
 
@@ -62,6 +51,7 @@ function hideRegistrationElements() {
     $('form#register input#password').val(Math.random().toString(36).slice(2));
 }
 
+
 function configureSignupFormDetails(auth) {
 
     $('form#register input#vid').val(auth.vid);
@@ -70,6 +60,20 @@ function configureSignupFormDetails(auth) {
     $('form#register input#first_name').val(auth.first_name);
     $('form#register input#last_name').val(auth.last_name);
     $('form#register input#email').val(auth.email);
+}
+
+function logoutSocialApps() {
+    var auth2 = gapi.auth2.getAuthInstance();
+
+    auth2.signOut().then(function () {
+    });
+
+    FB.getLoginStatus(function (statusResponse) {
+        if (statusResponse['connected'] == true) {
+            FB.logout(function (logoutResponse) {
+            })
+        }
+    });
 }
 
 
@@ -98,12 +102,16 @@ $(function() {
             });
     }
 
+
     $('a.social-btn-google').click(function (e) {
 
         var isLoginBtn = $(this).hasClass('social-btn-login');
         var auth2 = gapi.auth2.getAuthInstance();
         auth2.signIn().then(function () {
             var google_user = auth2.currentUser.get();
+            // showModal('Facebook', pretty(google_user));
+            // return;
+
             var id_token = google_user.getAuthResponse().id_token;
             responseHandler(isLoginBtn, {'vendor': 'google', 'token': id_token})
         });
@@ -111,10 +119,13 @@ $(function() {
         e.preventDefault();
     })
 
+
     $('a.social-btn-facebook').click(function (e) {
         var isLoginBtn = $(this).hasClass('social-btn-login');
         var loginHandler = function (fbSigninResponse) {
             if (fbSigninResponse.status === 'connected') {
+                // showModal('Facebook', pretty(fbSigninResponse));
+                // return;
                 var access_token = fbSigninResponse.authResponse.accessToken;
                 responseHandler(isLoginBtn, {'vendor': 'facebook', 'token': access_token});
             }
@@ -129,20 +140,7 @@ $(function() {
 
 
     $('#signoutButton').click(function (e) {
-        var auth2 = gapi.auth2.getAuthInstance();
-
-        auth2.signOut().then(function () {
-            $('.google-status i.fab').removeClass('text-success');
-        });
-
-        FB.getLoginStatus(function (statusResponse) {
-            if (statusResponse['connected'] == true) {
-                FB.logout(function (logoutResponse) {
-                    $('.facebook-status i.fab').removeClass('text-success');
-                })
-            }
-        });
-
+        logoutSocialApps();
         $.get('/logout');
         window.location.href = '/';
     });
@@ -152,10 +150,12 @@ $(function() {
 
         var action = $(this).attr('action');
         var data = $(this).serialize();
-
         $.get(action, data)
             .done(function(r) {
-                if (r['connected'] == true) {
+                if (r == null) {
+                    showModal('Error', 'Unexpected response');
+                }
+                else if ('connected' in r && r['connected'] == true) {
                     window.location.href = '/';
                 }
                 else {
@@ -163,9 +163,8 @@ $(function() {
                 }
             })
             .fail(function(error) {
-                showModal('Error', pretty(r));
+                showModal('Error', pretty(error));
             })
-
         e.preventDefault();
     });
 
@@ -199,6 +198,7 @@ $(function() {
         $.get('/deleteCurrentUser')
             .then(function(r) {
                 if (r['deleted'] = true) {
+                    logoutSocialApps();
                     window.location.href = '/';
                 } else {
                     showModal('Error', pretty(r))

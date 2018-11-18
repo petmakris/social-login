@@ -10,7 +10,10 @@ setup(
         'jinja2==2.10',
         'requests==2.20.1',
         'mysql-connector==2.1.6',
-        'simplejson==3.16.0'
+        'simplejson==3.16.0',
+
+        # https://google-auth.readthedocs.io/en/latest/index.html
+        'google-auth==1.6.1'
     ],
 
     entry_points = {
