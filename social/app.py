@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
 ROOT          = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 TEMPLATES     = os.path.join(ROOT, 'templates')
 CREDENTIALS   = read_file_as_json(os.path.join(ROOT, 'credentials.json'))
-VENDORS       = ['google', 'facebook']
 
 google_client_id   = CREDENTIALS['google-client-id']
 google_secret      = CREDENTIALS['google-secret']
@@ -103,21 +102,15 @@ class SocialButtons(object):
     def token(self, vendor, token):
         if vendor == 'google':
             return self.handleAuth(googleTokenToAuthObject(token))
-
         elif vendor == 'facebook':
             return self.handleAuth(facebookTokenToAuthObject(token))
-
         else:
             return { 'error': 'Unknown Vendor [%s]' % vendor }
 
 
     def handleAuth(self, auth):
-        """
-        return the auth object to complete registration in case the user does not exist,
-        or if the users exists login user and return { 'connected': True } 
-        """
 
-        if auth['vendor'] in VENDORS:
+        if auth['vendor'] in ['google', 'facebook']:
             if auth['vendor'] == 'google':
                 u = self.users.findByGoogleId(auth['vid'])
                 if u is not None:
@@ -175,7 +168,7 @@ class SocialButtons(object):
     @cherrypy.tools.json_out()
     def createUser(self, **auth):
         user = User.getUserFromAuthObject(auth)
-        user_id = self.users.create(user) # check status
+        user_id = self.users.create(user)
         return self.loginUser(self.users.findById(user_id))
 
 
@@ -221,7 +214,6 @@ class SocialButtons(object):
             return { 'deleted': True }
         
         return { 'error': 'Unexpected error' }
-
 
 
 def app():

@@ -78,14 +78,18 @@ $(function() {
     function responseHandler(isLogin, tokenDetails) {
         $.get('/token?', tokenDetails)
             .done(function (authResponse) {
-                if (authResponse['connected'] == true) {
-                    window.location.href = '/';
+                if ('error' in authResponse ) {
+                    showModal('Error', pretty(authResponse));
                 } else {
-                    if (isLogin) {
-                            window.location.href = '/register?' + $.param(authResponse);
+                    if (authResponse['connected'] == true) {
+                        window.location.href = '/';
                     } else {
-                        hideRegistrationElements();
-                        configureSignupFormDetails(authResponse);
+                        if (isLogin) {
+                                window.location.href = '/register?' + $.param(authResponse);
+                        } else {
+                            hideRegistrationElements();
+                            configureSignupFormDetails(authResponse);
+                        }
                     }
                 }
             })
