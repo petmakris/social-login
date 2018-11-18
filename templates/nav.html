@@ -5,9 +5,10 @@
         <span class="navbar-toggler-icon"></span>
     </button>
 
-    
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav">
+
+            {% if not connected %}
             <li class="nav-item nav-register">
                 <a class="nav-link" href="/register">Register</a>
             </li>
@@ -15,10 +16,13 @@
             <li class="nav-item nav-login">
                 <a class="nav-link" href="/login">Login</a>
             </li>
-
+            {% endif %}
+                
+            {% if connected %}
             <li class="nav-item">
                 <a class="nav-link" href="#" id="signoutButton">Logout</a>
             </li>
+            {% endif %}
 
             <li class="nav-item google-status">
                 <span class="nav-link disabled"><i class="fab fa-google fa-lg"></i></span>
@@ -29,10 +33,51 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="#" id="dump"><i class="fas fa-info-circle"></i></a>
+                <a class="nav-link" href="" id="show-users">
+                    <i class="fas fa-users"></i>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="" id="show-session">
+                    <i class="fas fa-user"></i>
+                </a>
             </li>
     
+            <li class="nav-item">
+                <a class="nav-link" href="" id="show-model">
+                    <i class="fas fa-table"></i>
+                </a>
+            </li>
+
+            {% if connected %}
+            <li class="nav-item">
+                <a class="nav-link" href="" id="delete-user">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </li>
+            {% endif %}
 
         </ul>
     </div>
 </nav>
+
+
+<div class="modal" id="info-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title" id="modal-title"></h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <div class="modal-body"><pre><code id="modal-body"></code></pre></div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>

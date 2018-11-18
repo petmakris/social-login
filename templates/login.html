@@ -27,13 +27,12 @@ $('.nav-login').addClass('active');
     
             <div class="form-group">
                 <label for="email">Email address</label>
-                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="name@example.com"
-                    autocomplete="off">
+                <input type="email" class="form-control" id="email" placeholder="name@example.com" autocomplete="off">
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" autocomplete="off">
+                <input type="password" class="form-control" id="password" pattern="[\S]{3,64}" required autocomplete="off">
             </div>
 
             <input type="hidden" id="vendor"  name="vendor"    value="">

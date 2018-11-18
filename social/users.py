@@ -3,7 +3,8 @@ import json
 import mysql.connector
 from social.conf import read_file_as_json
 from jinja2 import Template
-from social.MiniDAO import *
+from social.user import User
+from social.dao import *
 
 import logging
 logger = logging.getLogger(__name__)
@@ -11,36 +12,6 @@ logger = logging.getLogger(__name__)
 ROOT        = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 CREDENTIALS = read_file_as_json(os.path.join(ROOT, 'credentials.json'))
 
-
-class User(object):
-
-    def __init__(self, first_name=None, last_name=None, email=None,
-                       password=None, devlang=None,
-                       google_id=None, google_email=None,
-                       facebook_id=None, facebook_email=None,
-                       user_id=None):
-
-        self.user_id = user_id
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-        self.password = password
-        self.devlang = devlang
-        self.google_id = google_id
-        self.google_email = google_email
-        self.facebook_id = facebook_id
-        self.facebook_email = facebook_email
-
-    def __str__(self):
-        return json.dumps(self.__dict__)
-
-    @classmethod
-    def columns(cls):
-        return [
-            'first_name', 'last_name', 'email', 'password', 'devlang',
-            'google_id', 'google_email', 'facebook_id', 'facebook_email',
-            'user_id',
-        ]
 
 class Users(MiniDAO):
 

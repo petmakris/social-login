@@ -1,15 +1,13 @@
 {% include 'head.html' %}
-
 <body>
 {% include 'nav.html' %}
-
-<div class="container-fluid">
-
-    <h4>Welcome {{ name }}</h4>
-
-</div>
-
-
+    <div class="container-fluid">
+        {% if connected %}
+            <h4>Welcome {{user.first_name}} {{ user.last_name }}, </h4>
+            <p>Now try to sign-out since there nothing to do here!</p>
+        {% else %}
+            <h4>Please try to login or sign up!</h4>
+        {% endif %}
+    </div>
 </body>
-
 </html>

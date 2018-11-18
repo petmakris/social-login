@@ -1,11 +1,15 @@
-var google_client_id = '315004607505-k9m58flrf24nrjdpqmbp5p6pfmfpmvvt.apps.googleusercontent.com';
-var facebook_app_id = '341008546449852';
 
+function pretty(obj) {
+    return JSON.stringify(obj, null, 4).trim();
+}
+
+function showModal(title, body) {
+    $('#modal-title').text(title);
+    $('#modal-body').html(body);
+    $('#info-modal').modal('show');
+}
 
 gapi.load('auth2', function () {
-
-    console.log(':: google init()')
- 
     auth2 = gapi.auth2.init({
         client_id: google_client_id,
         fetch_basic_profile: true,
@@ -31,10 +35,8 @@ setTimeout(function() {
 }(document, 'script', 'facebook-jssdk'));
 
 
+
 window.fbAsyncInit = function () {
-
-    console.log(':: facebook init()')
-
     FB.init({
         appId: facebook_app_id,
         cookie: true,
@@ -43,7 +45,7 @@ window.fbAsyncInit = function () {
     });
 
     FB.getLoginStatus(function (statusResponse) {
-        if (statusResponse['status'] == 'connected') {
+        if (statusResponse['connected'] == true) {
             $('.facebook-status i.fab').addClass('text-success');
         } 
     });
@@ -71,14 +73,12 @@ function configureSignupFormDetails(auth) {
 }
 
 
-$().ready(function () {
+$(function() {
 
     function responseHandler(isLogin, tokenDetails) {
         $.get('/token?', tokenDetails)
             .done(function (authResponse) {
-                console.log(authResponse);
-
-                if (authResponse.status == 'connected') {
+                if (authResponse['connected'] == true) {
                     window.location.href = '/';
                 } else {
                     if (isLogin) {
@@ -90,12 +90,11 @@ $().ready(function () {
                 }
             })
             .fail(function (err) {
-                console.error('Failed', err);
+                showModal('Failure', pretty(err));
             });
     }
 
     $('a.social-btn-google').click(function (e) {
-        e.preventDefault();
 
         var isLoginBtn = $(this).hasClass('social-btn-login');
         var auth2 = gapi.auth2.getAuthInstance();
@@ -105,11 +104,10 @@ $().ready(function () {
             responseHandler(isLoginBtn, {'vendor': 'google', 'token': id_token})
         });
 
-        return false;
+        e.preventDefault();
     })
 
     $('a.social-btn-facebook').click(function (e) {
-        e.preventDefault();
         var isLoginBtn = $(this).hasClass('social-btn-login');
         var loginHandler = function (fbSigninResponse) {
             if (fbSigninResponse.status === 'connected') {
@@ -122,13 +120,11 @@ $().ready(function () {
         };
    
         FB.login(loginHandler, loginParams);
-
-        return false;
+        e.preventDefault();
     })
 
 
     $('#signoutButton').click(function (e) {
-        e.preventDefault();
         var auth2 = gapi.auth2.getAuthInstance();
 
         auth2.signOut().then(function () {
@@ -136,7 +132,7 @@ $().ready(function () {
         });
 
         FB.getLoginStatus(function (statusResponse) {
-            if (statusResponse['status'] == 'connected') {
+            if (statusResponse['connected'] == true) {
                 FB.logout(function (logoutResponse) {
                     $('.facebook-status i.fab').removeClass('text-success');
                 })
@@ -145,35 +141,66 @@ $().ready(function () {
 
         $.get('/logout');
         window.location.href = '/';
-
-        return false;
     });
 
+    
     $("form#register").submit(function(e) {
-        e.preventDefault();
 
-        var form = $(this);
-        $.ajax({
-            type: "POST",
-            url: form.attr('action'),
-            data: form.serialize(),
-            success: function(data) {
-                console.log(data)
+        var action = $(this).attr('action');
+        var data = $(this).serialize();
+
+        $.get(action, data)
+            .done(function(r) {
+                if (r['connected'] == true) {
+                    window.location.href = '/';
                 }
-            });
+                else {
+                    showModal('Error', pretty(r));
+                }
+            })
+            .fail(function(error) {
+                showModal('Error', pretty(r));
+            })
 
-        return false;
-    });
-
-
-    $("#dump").click(function(e) {
         e.preventDefault();
-
-        $.get('/users').then(function(r) {
-            console.log(r);
-        })
-        return false;
     });
 
+
+    $('#show-users').click(function (e) {
+        $.get('/getUsers')
+            .then(function(r) {
+                showModal('Users', pretty(r));
+            })
+        e.preventDefault();
+    })
+
+
+    $('#show-session').click(function (e) {
+        $.get('/getSession')
+            .then(function(r) { 
+                showModal('Session', pretty(r));
+            })
+        e.preventDefault();
+    })
+
+    $('#show-model').click(function (e) {
+        $.get('/getModel')
+            .then(function(r) { 
+                showModal('Model', pretty(r));
+            })
+        e.preventDefault();
+    })
+
+    $('#delete-user').click(function (e) {
+        $.get('/deleteCurrentUser')
+            .then(function(r) {
+                if (r['deleted'] = true) {
+                    window.location.href = '/';
+                } else {
+                    showModal('Error', pretty(r))
+                }
+            })
+        e.preventDefault();
+    })
 
 })

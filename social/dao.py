@@ -63,6 +63,18 @@ class MiniDAO(object):
         else:
             return [self.clasz(*values) for values in cur.fetchall()]
 
+    
+    def delete(self, user):
+        self.deleteById(user.user_id)
+
+
+    def deleteById(self, user_id):
+        cur = self.con.cursor()
+        q = self.render('DELETE FROM {{table}} WHERE user_id = %s')
+        v = (user_id,)
+        self.execute(cur, q, v)
+        self.con.commit()
+
 
     def removeAll(self):
         cur = self.con.cursor()
@@ -72,11 +84,10 @@ class MiniDAO(object):
         self.con.commit()
 
 
-    def create(self, obj):
+    def create(self, entity):
         cur = self.con.cursor()
 
-        c = self.clasz.columns()
-        valueables = [obj.__getattribute__(name) for name in self.clasz.columns()]
+        valueables = [entity.__getattribute__(name) for name in self.clasz.columns()]
 
         q = self.render(
             'INSERT INTO {{table}} ({{all}}) VALUES ({{values}})',
@@ -89,18 +100,18 @@ class MiniDAO(object):
         return cur.lastrowid
 
 
-    def update(self, obj):
+    def update(self, entity):
         cur = self.con.cursor()
 
         columns = self.clasz.columns()
-        values = [obj.__getattribute__(name) for name in self.clasz.columns()]
+        values = [entity.__getattribute__(name) for name in self.clasz.columns()]
 
         update_values = ', '.join([ "%s='%s'" % (c, v) for (c, v) in zip(columns, values) ])
 
         q = self.render(
             "UPDATE {{table}} SET {{values}} WHERE user_id={{user_id}}",
             values=update_values,
-            user_id=obj.user_id)
+            user_id=entity.user_id)
 
         self.execute(cur, q)
         self.con.commit()

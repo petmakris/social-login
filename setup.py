@@ -9,7 +9,8 @@ setup(
         'cherrypy==18.0.1',
         'jinja2==2.10',
         'requests==2.20.1',
-        'mysql-connector==2.1.6'
+        'mysql-connector==2.1.6',
+        'simplejson==3.16.0'
     ],
 
     entry_points = {

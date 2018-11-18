@@ -26,7 +26,12 @@
 
     <script src="https://apis.google.com/js/platform.js"></script>
 
-    <script type="application/javascript" src="/assets/social.js"></script>
+    <script type="application/javascript" src="/assets/social.js?v={{version}}"></script>
 
-    <link rel="stylesheet" type="text/css" href="/assets/social.css">
+    <link rel="stylesheet" type="text/css" href="/assets/social.css?v={{version}}">
+
+    <script>
+        google_client_id = {% config['google-client-id'] %};
+        facebook_client_id = {% config['facebook-client-id'] %};
+    </script>
 </head>

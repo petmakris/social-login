@@ -31,16 +31,19 @@ def render(template_root, template_name, model=None):
     return template.render(model)
 
 
-def get_session_id():
-    if 'sessionid' not in cherrypy.session:
-        cherrypy.session['sessionid'] = uuid.uuid4()
-
-    return cherrypy.session['sessionid']
-
-
 def read_file_as_json(creds):
     with open(creds) as f:
         return json.loads(f.read())
+
+
+def session(key):
+    if key not in cherrypy.session:
+        return None
+    return cherrypy.session[key]
+
+
+def update_session(k, v):
+    cherrypy.session[k] = v
 
 
 def start_server(root_path, root_object):
