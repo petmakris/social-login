@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name = "yaml_tools_project",
+    name = "social-buttons",
     version = "0.1",
     packages = find_packages(),
     author = "Petros Makris",
@@ -9,7 +9,8 @@ setup(
         'cherrypy==18.0.1',
         'jinja2==2.10',
         'requests==2.20.1',
-        'mysql-connector==2.1.6',
+        # 'mysql-connector==2.1.6',
+        'mysql-connector-python==8.0.13',
         'simplejson==3.16.0',
 
         # https://google-auth.readthedocs.io/en/latest/index.html

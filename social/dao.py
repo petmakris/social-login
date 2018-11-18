@@ -29,7 +29,8 @@ class MiniDAO(object):
             host=hostname,
             user=username,
             passwd=password,
-            database=self.database)
+            database=self.database,
+            ) #a uth_plugin='mysql_native_password'
 
 
     def render(self, q, **args):
