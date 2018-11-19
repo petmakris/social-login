@@ -1,14 +1,30 @@
+# https://gist.github.com/adrienjoly/1373945
+# https://gist.github.com/albertobajo/670637
+
 import json
 import base64
 import requests
 import urllib
 import logging
 
+import hmac
+import simplejson as json
+
+from base64 import urlsafe_b64decode
+from hashlib import sha256
+
 logger = logging.getLogger(__name__)
 
 from social.conf import colorize
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+
+
+# Move this to utils and use this for google token open
+def base64_url_decode(input):
+    input += '=' * (4 - (len(input) % 4))
+    return urlsafe_b64decode(input.encode('utf-8'))
+
 
 # https://developers.google.com/identity/sign-in/web/backend-auth
 
@@ -51,9 +67,8 @@ def isValidGoogleAuthObject(token, google_client_id, google_secret):
 def googleTokenToAuthObject(id_token, google_client_id, google_secret):
 
     body = id_token.split('.')[1]
-    body += '=' * ((4- len(body) % 4) % 4)
 
-    auth_response = json.loads(base64.b64decode(body))
+    auth_response = json.loads(base64_url_decode(body))
     
     if isValidGoogleAuthObject(id_token, google_client_id, google_secret):
         return {
@@ -68,6 +83,24 @@ def googleTokenToAuthObject(id_token, google_client_id, google_secret):
     else:
         raise ValueError('Invalid Token')
 
+
+def parse_signed_request(signed_request, secret):
+    [encoded_sig, payload] = signed_request.split('.')
+    
+    # decode data
+    sig = base64_url_decode(encoded_sig)
+    data = json.loads(base64_url_decode(payload))
+    
+    if data['algorithm'].upper() != 'HMAC-SHA256':
+        raise ValueError('Unknown algorithm. Expected HMAC-SHA256')
+    
+    # check sig
+    expected_sig = hmac.new(secret, payload, sha256).digest()
+    if sig != expected_sig:
+        raise ValueError('Bad Signed JSON signature!')
+    
+    return data
+    
 
 
 def isValidFacebookAuthObject(token, facebook_client_id, facebook_secret):
