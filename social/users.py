@@ -74,5 +74,3 @@ def app():
     users.update(u)
 
     assert users.findByGoogleId('new_google_id').user_id == u.user_id
-
-

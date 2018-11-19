@@ -1,6 +1,6 @@
 import os
 import cherrypy
-import simplejson
+import simplejson as json
 import base64
 import requests
 import urllib
@@ -12,10 +12,10 @@ from social.conf import read_file_as_json
 from social.conf import start_server
 from social.conf import colorize
 
-from social.auth_tools import googleTokenToAuthObject
-from social.auth_tools import facebookTokenToAuthObject
-from social.auth_tools import isValidGoogleAuthObject
-from social.auth_tools import isValidFacebookAuthObject
+from social.auth import googleTokenToAuthObject
+from social.auth import facebookTokenToAuthObject
+from social.auth import isValidGoogleAuthObject
+from social.auth import isValidFacebookAuthObject
 
 from social.user import User
 from social.users import Users
@@ -239,4 +239,3 @@ def app():
     logging.basicConfig(level=logging.DEBUG)
     Users().removeAll()
     start_server(ROOT, SocialButtons())
-

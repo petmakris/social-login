@@ -2,7 +2,6 @@ import json
 
 __all__ = [ 'User' ]
 
-
 class User(object):
 
     def __init__(self, first_name=None, last_name=None, email=None,

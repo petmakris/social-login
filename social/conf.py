@@ -2,7 +2,7 @@ import os
 import uuid
 import cherrypy
 import jinja2
-import json
+import simplejson as json
 
 import logging
 import logging.config

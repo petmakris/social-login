@@ -9,7 +9,6 @@ import logging
 
 import hmac
 import simplejson as json
-
 from base64 import urlsafe_b64decode
 from hashlib import sha256
 
@@ -20,7 +19,6 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
 
-# Move this to utils and use this for google token open
 def base64_url_decode(input):
     input += '=' * (4 - (len(input) % 4))
     return urlsafe_b64decode(input.encode('utf-8'))
@@ -45,7 +43,6 @@ def base64_url_decode(input):
 #     d['aud'] == client_id,
 #     d['sub'] == auth['vid'],
 # ])
-
 
 
 def isValidGoogleAuthObject(token, google_client_id, google_secret):
@@ -84,23 +81,26 @@ def googleTokenToAuthObject(id_token, google_client_id, google_secret):
         raise ValueError('Invalid Token')
 
 
+
+
 def parse_signed_request(signed_request, secret):
-    [encoded_sig, payload] = signed_request.split('.')
+    [encoded_signature, encoded_payload] = signed_request.split('.')
     
-    # decode data
-    sig = base64_url_decode(encoded_sig)
-    data = json.loads(base64_url_decode(payload))
+    signature = base64_url_decode(encoded_signature)
+
+    payload = json.loads(base64_url_decode(encoded_payload))
     
-    if data['algorithm'].upper() != 'HMAC-SHA256':
-        raise ValueError('Unknown algorithm. Expected HMAC-SHA256')
+    if payload['algorithm'].upper() != 'HMAC-SHA256':
+        raise ValueError('Unknown algorithm [%s]. Expected HMAC-SHA256' % payload['algorithm'].upper())
     
-    # check sig
-    expected_sig = hmac.new(secret, payload, sha256).digest()
-    if sig != expected_sig:
+    expected_signature = hmac.new(
+        secret.encode('utf-8'),
+        encoded_payload.encode('utf-8'), sha256).digest()
+
+    if signature != expected_signature:
         raise ValueError('Bad Signed JSON signature!')
     
-    return data
-    
+    return payload
 
 
 def isValidFacebookAuthObject(token, facebook_client_id, facebook_secret):

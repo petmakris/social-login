@@ -1,4 +1,3 @@
-
 function pretty(obj) {
     return JSON.stringify(obj, null, 4).trim();
 }
@@ -14,6 +13,9 @@ gapi.load('auth2', function () {
         client_id: google_client_id,
         fetch_basic_profile: true,
         scope: 'openid'
+    }).then(function (r) {
+    }, 
+    function(err) {
     });
 });
 
@@ -109,9 +111,7 @@ $(function() {
         var auth2 = gapi.auth2.getAuthInstance();
         auth2.signIn().then(function () {
             var google_user = auth2.currentUser.get();
-            // showModal('Facebook', pretty(google_user));
-            // return;
-
+            // return showModal('Facebook', pretty(google_user));
             var id_token = google_user.getAuthResponse().id_token;
             responseHandler(isLoginBtn, {'vendor': 'google', 'token': id_token})
         });
@@ -124,8 +124,7 @@ $(function() {
         var isLoginBtn = $(this).hasClass('social-btn-login');
         var loginHandler = function (fbSigninResponse) {
             if (fbSigninResponse.status === 'connected') {
-                // showModal('Facebook', pretty(fbSigninResponse));
-                // return;
+                // return showModal('Facebook', pretty(fbSigninResponse));
                 var access_token = fbSigninResponse.authResponse.accessToken;
                 responseHandler(isLoginBtn, {'vendor': 'facebook', 'token': access_token});
             }
@@ -145,7 +144,7 @@ $(function() {
         window.location.href = '/';
     });
 
-    
+
     $("form#register").submit(function(e) {
 
         var action = $(this).attr('action');
