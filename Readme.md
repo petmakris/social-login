@@ -7,7 +7,7 @@ user's basic profile information via graph API)
 Licence [MIT](https://opensource.org/licenses/MIT)
 
 ### Google: get the `id_token` and verify it's signature (or verify via a request)
-### Facebook: the the `access_code` and further on get user's public profile
+### Facebook: the `access_code` and further on get user's public profile
 
 ## Installation instructions
 
