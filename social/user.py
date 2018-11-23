@@ -10,7 +10,6 @@ class User(object):
                        facebook_id=None, facebook_email=None,
                        user_id=None):
 
-        self.user_id = user_id
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
@@ -20,8 +19,20 @@ class User(object):
         self.google_email = google_email
         self.facebook_id = facebook_id
         self.facebook_email = facebook_email
+        self.user_id = user_id
 
-    
+
+    def __getattr__(self, name):
+        if name is 'id':
+            return self.user_id
+        else:
+            return self.__getattribute__(name)
+
+
+    @classmethod
+    def id_column(cls):
+        return 'user_id'
+
     
     @classmethod
     def getUserFromAuthObject(cls, auth):

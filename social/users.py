@@ -25,10 +25,6 @@ class Users(MiniDAO):
             verbose=False)
 
 
-    def findById(self, user_id):
-        return self.findBy('user_id', user_id, limit=1)
-
-
     def findByGoogleId(self, google_id):
         return self.findBy('google_id', google_id, limit=1)
 
@@ -73,4 +69,4 @@ def app():
     u.google_id = 'new_google_id'
     users.update(u)
 
-    assert users.findByGoogleId('new_google_id').user_id == u.user_id
+    assert users.findByGoogleId('new_google_id').id == u.id

@@ -34,13 +34,21 @@ class MiniDAO(object):
 
 
     def render(self, q, **args):
-        return render(q, all=self.all, table=self.table, **args)
+        return render(q,
+            all=self.all,
+            table=self.table,
+            id_column=self.clasz.id_column(),
+            **args)
 
 
     def execute(self, cursor, operation, params=None, multi=False):
         if self.verbose:
             logger.debug(operation)
         return cursor.execute(operation, params, multi)
+
+
+    def findById(self, eid):
+        return self.findBy(self.clasz.id_column(), eid, limit=1)
 
 
     def findBy(self, column, arg, limit, oper=EQ):
@@ -65,14 +73,14 @@ class MiniDAO(object):
             return [self.clasz(*values) for values in cur.fetchall()]
 
     
-    def delete(self, user):
-        self.deleteById(user.user_id)
+    def delete(self, entity):
+        self.deleteById(entity.id)
 
 
-    def deleteById(self, user_id):
+    def deleteById(self, eid):
         cur = self.con.cursor()
-        q = self.render('DELETE FROM {{table}} WHERE user_id = %s')
-        v = (user_id,)
+        q = self.render('DELETE FROM {{table}} WHERE {{id_column}} = %s')
+        v = (eid,)
         self.execute(cur, q, v)
         self.con.commit()
 
@@ -110,9 +118,9 @@ class MiniDAO(object):
         update_values = ', '.join([ "%s='%s'" % (c, v) for (c, v) in zip(columns, values) ])
 
         q = self.render(
-            "UPDATE {{table}} SET {{values}} WHERE user_id={{user_id}}",
+            "UPDATE {{table}} SET {{values}} WHERE {{id_column}}={{eid}}",
             values=update_values,
-            user_id=entity.user_id)
+            eid=entity.id)
 
         self.execute(cur, q)
         self.con.commit()
