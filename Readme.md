@@ -55,6 +55,6 @@ Upon finishing registration the user is created
 
 # Register existing user
 
-Trying to register with an email that already exists in the database the user's account information is updated
+Trying to register with Faceboo an email that already exists in the database the user's account information is updated
 
 ![](facebook.gif)
