@@ -14,8 +14,8 @@ from social.conf import colorize
 
 from social.auth import googleTokenToAuthObject
 from social.auth import facebookTokenToAuthObject
-from social.auth import isValidGoogleAuthObject
-from social.auth import isValidFacebookAuthObject
+from social.auth import isGoogleValid
+from social.auth import isFacebookValid
 
 from social.user import User
 from social.users import Users
@@ -25,9 +25,10 @@ logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
-ROOT          = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-TEMPLATES     = os.path.join(ROOT, 'templates')
-CREDENTIALS   = read_file_as_json(os.path.join(ROOT, 'credentials.json'))
+ROOT           = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+TEMPLATES      = os.path.join(ROOT, 'templates')
+CREDENTIALS_FN = os.path.join(ROOT, 'credentials.json')
+CREDENTIALS    = read_file_as_json(CREDENTIALS_FN)
 
 google_client_id   = CREDENTIALS['google-client-id']
 google_secret      = CREDENTIALS['google-secret']
@@ -39,8 +40,7 @@ facebook_secret    = CREDENTIALS['facebook-secret']
 def config():
     return {
         'google-client-id': google_client_id,
-        'facebook-client-id': facebook_client_id,
-        'cache-version': int(time.time() * 10.0)
+        'facebook-client-id': facebook_client_id
     }
 
 
@@ -51,15 +51,11 @@ class SocialButtons(object):
 
 
     def isLoggedIn(self):
-        return session('connected') == True
+        return session('connected')
 
 
     def currentUserId(self):
-        user_id = session('user_id')
-        if user_id is None:
-            return None
-        else:
-            return user_id
+        return session('user_id')
 
 
     def currentUser(self):
@@ -70,17 +66,18 @@ class SocialButtons(object):
         return self.users.findById(user_id).asDict()
 
 
-    def model(self, model_data={}):
+    def baseModel(self, model_data={}):
         return {
             'connected': self.isLoggedIn(),
             'user': self.currentUser(),
             'data': model_data,
+            'cache-version': int(time.time() * 10.0),
             'config': config()
         }
 
 
     def render(self, template, model={}):
-        return render(TEMPLATES, template, self.model(model))
+        return render(TEMPLATES, template, self.baseModel(model))
 
 
     @cherrypy.expose
@@ -170,16 +167,17 @@ class SocialButtons(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def createUser(self, **auth):
-        user = User.getUserFromAuthObject(auth)
+
 
         if auth['vendor'] == 'google':
-            if not isValidGoogleAuthObject(auth['token'], google_client_id, google_secret):
+            if not isGoogleValid(auth['token'], google_client_id, google_secret):
                 return { 'error': 'Invalid token' }
 
         elif auth['vendor'] == 'facebook':
-            if not isValidFacebookAuthObject(auth['token'], facebook_client_id, facebook_secret):
+            if not isFacebookValid(auth['token'], facebook_client_id, facebook_secret):
                 return {'error': 'Invalid token' }
 
+        user = User.getUserFromAuthObject(auth)
 
         u = self.users.findByEmail(auth['email'])
         if u is None:
@@ -220,7 +218,7 @@ class SocialButtons(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def getModel(self):
-        return self.model()
+        return self.baseModel()
 
 
     @cherrypy.expose

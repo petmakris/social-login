@@ -14,6 +14,7 @@ gapi.load('auth2', function () {
         fetch_basic_profile: true,
         scope: 'openid'
     }).then(function (r) {
+        console.log(r);
     }, 
     function(err) {
     });
@@ -44,7 +45,6 @@ window.fbAsyncInit = function () {
 
 
 function hideRegistrationElements() {
-
     $('form#register div#social-buttons').hide();
     $('form#register div.first_name').hide();
     $('form#register div.last_name').hide();
@@ -55,7 +55,6 @@ function hideRegistrationElements() {
 
 
 function configureSignupFormDetails(auth) {
-
     $('form#register input#vid').val(auth.vid);
     $('form#register input#vendor').val(auth.vendor);
     $('form#register input#token').val(auth.token);
@@ -84,6 +83,8 @@ $(function() {
     function responseHandler(isLogin, tokenDetails) {
         $.get('/token?', tokenDetails)
             .done(function (authResponse) {
+                // return showModal('AuthResponse', pretty(authResponse));
+
                 if ('error' in authResponse ) {
                     showModal('Error', pretty(authResponse));
                 } else {
@@ -111,7 +112,7 @@ $(function() {
         var auth2 = gapi.auth2.getAuthInstance();
         auth2.signIn().then(function () {
             var google_user = auth2.currentUser.get();
-            // return showModal('Facebook', pretty(google_user));
+            // return showModal('Google AuthResponse', pretty(google_user));
             var id_token = google_user.getAuthResponse().id_token;
             responseHandler(isLoginBtn, {'vendor': 'google', 'token': id_token})
         });
@@ -124,7 +125,7 @@ $(function() {
         var isLoginBtn = $(this).hasClass('social-btn-login');
         var loginHandler = function (fbSigninResponse) {
             if (fbSigninResponse.status === 'connected') {
-                // return showModal('Facebook', pretty(fbSigninResponse));
+                // return showModal('Facebook AuthResponse', pretty(fbSigninResponse));
                 var access_token = fbSigninResponse.authResponse.accessToken;
                 responseHandler(isLoginBtn, {'vendor': 'facebook', 'token': access_token});
             }
