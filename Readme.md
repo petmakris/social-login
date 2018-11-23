@@ -12,17 +12,18 @@ user's basic profile information via graph API)
 Steps highly compressed in descripton, it will take you some time to match and configure
 the Facebook App and Google Project.
 
-- Configure in `/etc/hosts` the domain `socialbuttons.com` to point to `127.0.0.1`
+- create a Google Project and get your `google-client-id`, `google-client-secret`
+(use the `socialbuttons.com` domain)
+- create a Facebook app and get your `facebook-client-id`, `facebook-client-secret`
+(use the `socialbuttons.com` domain)
+
+- configure in `/etc/hosts` the domain `socialbuttons.com` to point to `127.0.0.1`
 - create the `credentials.json` file (see bellow)
 - prepare the database (`db.sql`)
 - create a virtualenv (`python -m venv venv`) and source it
 - install for development `python3 -m pip install -e .` or `pip install -e .`
 - execute `serve`
 
-- Create a Google Project and get your `google-client-id`, `google-client-secret`
-(use the `socialbuttons.com` domain)
-- Create a Facebook app and get your `facebook-client-id`, `facebook-client-secret`
-(use the `socialbuttons.com` domain)
 
 ## `credentials.json`
 
