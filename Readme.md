@@ -1,7 +1,7 @@
 # Real life implementation of Social Login using Google/Facebook (Python3)
 
 - Uses hybrid/implicit flow for Google (get the `id_token`) and verify it
-- Users hybrid/server flow for Facebook (get the `access_code` and access
+- Uses hybrid/server flow for Facebook (get the `access_code` and retrieve
 user's basic profile information via graph API)
 
 ## Google: get the `id_token` and verify it's signature (or verify via a request)
@@ -12,11 +12,11 @@ user's basic profile information via graph API)
 Steps highly compressed in descripton, it will take you some time to match and configure
 the Facebook App and Google Project.
 
-- Configure in your `/etc/hosts` the domain `socialbuttons.com` to point to `127.0.0.1`
+- Configure your `/etc/hosts` the domain `socialbuttons.com` to point to `127.0.0.1`
 - create the `credentials.json` file (see bellow)
 - prepare the database (`db.sql`)
 - create a virtualenv (`python -m venv venv`) and source it
-- install for development `python3 -m pip install -e .`
+- install for development `python3 -m pip install -e .` or `pip install -e .`
 - execute `serve`
 
 - Create a Google Project and get your `google-client-id`, `google-client-secret`
@@ -26,7 +26,7 @@ the Facebook App and Google Project.
 
 ## `credentials.json`
 
-Configure accordingly
+Create a file `credentials.json` and configure accordingly
 
 ```json
 {
@@ -45,13 +45,13 @@ Configure accordingly
 # Register non existing user
 
 
-Trying to login with facebook, will result in **pre-filling** the registration form.
-Upon completion the user is registered.
+Trying to login with Google, will result in **pre-filling** the registration form.
+Upon finishing registration the user is created
 
 ![](google.gif)
 
 # Register existing user
 
-Trying to register with an email that already exists in the database the user accounts are merged
+Trying to register with an email that already exists in the database the user's account information is updated
 
 ![](facebook.gif)
