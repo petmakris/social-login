@@ -1,7 +1,5 @@
 CREATE SCHEMA socialbuttons ;
 
-drop table socialbuttons.users;
-
 CREATE TABLE socialbuttons.users (
     user_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     first_name VARCHAR(128) NULL DEFAULT NULL,
