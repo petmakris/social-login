@@ -12,7 +12,7 @@ user's basic profile information via graph API)
 Steps highly compressed in descripton, it will take you some time to match and configure
 the Facebook App and Google Project.
 
-- Configure your `/etc/hosts` the domain `socialbuttons.com` to point to `127.0.0.1`
+- Configure in `/etc/hosts` the domain `socialbuttons.com` to point to `127.0.0.1`
 - create the `credentials.json` file (see bellow)
 - prepare the database (`db.sql`)
 - create a virtualenv (`python -m venv venv`) and source it
