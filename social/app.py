@@ -71,7 +71,7 @@ class SocialButtons(object):
             'connected': self.isLoggedIn(),
             'user': self.currentUser(),
             'data': model_data,
-            'cache-version': int(time.time() * 10.0),
+            'cacheVersion': int(time.time() * 10.0),
             'config': config()
         }
 
